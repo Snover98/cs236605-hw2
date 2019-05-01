@@ -9,6 +9,7 @@ class Block(abc.ABC):
     A block is some computation element in a network architecture which
     supports automatic differentiation using forward and backward functions.
     """
+
     def __init__(self):
         # Store intermediate values needed to compute gradients in this hash
         self.grad_cache = {}
@@ -115,8 +116,8 @@ class Linear(Block):
         # You should accumulate gradients in dw and db.
         # ====== YOUR CODE: ======
         x: torch.Tensor = self.grad_cache['x']
-        self.dw += x.t().matmul(dout)
-        self.db += torch.ones_like(self.b)
+        self.dw += x.t().matmul(dout).t()
+        self.db += torch.ones(dout.shape[0]).matmul(dout)
         dx = dout.matmul(self.w)
         # ========================
 
@@ -130,6 +131,7 @@ class ReLU(Block):
     """
     Rectified linear unit.
     """
+
     def __init__(self):
         super().__init__()
 
@@ -142,7 +144,7 @@ class ReLU(Block):
         """
 
         # ====== YOUR CODE: ======
-        out = x.clanp(0)
+        out = x.clamp(min=0)
         # ========================
 
         self.grad_cache['x'] = x
@@ -159,6 +161,7 @@ class ReLU(Block):
         x: torch.Tensor = self.grad_cache['x']
         dx = torch.zeros_like(x)
         dx[x > 0] = 1
+        dx *= dout
         # ========================
 
         return dx
@@ -174,6 +177,7 @@ class Sigmoid(Block):
     """
     Sigmoid activation function.
     """
+
     def __init__(self):
         super().__init__()
 
@@ -187,7 +191,7 @@ class Sigmoid(Block):
 
         # grad_cache.
         # ====== YOUR CODE: ======
-        out = 1./(1 + torch.exp(-x))
+        out = 1. / (1 + torch.exp(-x))
         self.grad_cache['sig(x)'] = out
         # ========================
 
@@ -211,6 +215,12 @@ class Sigmoid(Block):
 
     def __repr__(self):
         return 'Sigmoid'
+
+
+def softmax(x):
+    x = torch.exp(x)
+    x = x / x.sum(dim=1).view(-1, 1)
+    return x
 
 
 class CrossEntropyLoss(Block):
@@ -245,12 +255,9 @@ class CrossEntropyLoss(Block):
         # Tip: to get a different column from each row of a matrix tensor m,
         # you can index it with m[range(num_rows), list_of_cols].
         # ====== YOUR CODE: ======
-        def softmax(x):
-            x = torch.exp(x)
-            x /= x.sum(dim=1)
-            return x
 
-        loss = -y.t().matmul(torch.log(softmax(x)))
+        loss = -torch.log(softmax(x)[range(N), y])
+        loss = loss.mean()
         # ========================
 
         self.grad_cache['x'] = x
@@ -269,7 +276,9 @@ class CrossEntropyLoss(Block):
 
         # TODO: Calculate the gradient w.r.t. the input x
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        dx = softmax(x)
+        dx[range(N), y] -= 1
+        dx = dx / N
         # ========================
 
         return dx
@@ -317,6 +326,7 @@ class Sequential(Block):
     """
     A Block that passes input through a sequence of other blocks.
     """
+
     def __init__(self, *blocks):
         super().__init__()
         self.blocks = blocks
@@ -327,7 +337,9 @@ class Sequential(Block):
         # TODO: Implement the forward pass by passing each block's output
         # as the input of the next.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        out = x
+        for block in self.blocks:
+            out = block(out, **kw)
         # ========================
 
         return out
@@ -339,7 +351,9 @@ class Sequential(Block):
         # Each block's input gradient should be the previous block's output
         # gradient. Behold the backpropagation algorithm in action!
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        din = dout
+        for block in self.blocks[::-1]:
+            din = block.backward(din)
         # ========================
 
         return din
@@ -349,7 +363,8 @@ class Sequential(Block):
 
         # TODO: Return the parameter tuples from all blocks.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        for block in self.blocks:
+            params += block.params()
         # ========================
 
         return params
@@ -369,4 +384,3 @@ class Sequential(Block):
 
     def __getitem__(self, item):
         return self.blocks[item]
-
