@@ -111,11 +111,10 @@ class Linear(Block):
         :param dout: Gradient with respect to block output, shape (N, Dout).
         :return: Gradient with respect to block input, shape (N, Din)
         """
-        x = self.grad_cache['x']
+        x: torch.Tensor = self.grad_cache['x']
 
         # You should accumulate gradients in dw and db.
         # ====== YOUR CODE: ======
-        x: torch.Tensor = self.grad_cache['x']
         self.dw += x.t().matmul(dout).t()
         self.db += torch.ones(dout.shape[0]).matmul(dout)
         dx = dout.matmul(self.w)
@@ -155,10 +154,9 @@ class ReLU(Block):
         :param dout: Gradient with respect to block output, shape (N, *).
         :return: Gradient with respect to block input, shape (N, *)
         """
-        x = self.grad_cache['x']
+        x: torch.Tensor = self.grad_cache['x']
 
         # ====== YOUR CODE: ======
-        x: torch.Tensor = self.grad_cache['x']
         dx = torch.zeros_like(x)
         dx[x > 0] = 1
         dx *= dout
@@ -250,12 +248,7 @@ class CrossEntropyLoss(Block):
         xmax, _ = torch.max(x, dim=1, keepdim=True)
         x = x - xmax  # for numerical stability
 
-        # TODO: Compute the cross entropy loss using the last formula from the
-        # notebook (i.e. directly using the class scores).
-        # Tip: to get a different column from each row of a matrix tensor m,
-        # you can index it with m[range(num_rows), list_of_cols].
         # ====== YOUR CODE: ======
-
         loss = -torch.log(softmax(x)[range(N), y])
         loss = loss.mean()
         # ========================
@@ -274,7 +267,6 @@ class CrossEntropyLoss(Block):
         y = self.grad_cache['y']
         N = x.shape[0]
 
-        # TODO: Calculate the gradient w.r.t. the input x
         # ====== YOUR CODE: ======
         dx = softmax(x)
         dx[range(N), y] -= 1
@@ -334,8 +326,6 @@ class Sequential(Block):
     def forward(self, x, **kw):
         out = None
 
-        # TODO: Implement the forward pass by passing each block's output
-        # as the input of the next.
         # ====== YOUR CODE: ======
         out = x
         for block in self.blocks:
@@ -347,9 +337,6 @@ class Sequential(Block):
     def backward(self, dout):
         din = None
 
-        # TODO: Implement the backward pass.
-        # Each block's input gradient should be the previous block's output
-        # gradient. Behold the backpropagation algorithm in action!
         # ====== YOUR CODE: ======
         din = dout
         for block in self.blocks[::-1]:
@@ -361,7 +348,6 @@ class Sequential(Block):
     def params(self):
         params = []
 
-        # TODO: Return the parameter tuples from all blocks.
         # ====== YOUR CODE: ======
         for block in self.blocks:
             params += block.params()

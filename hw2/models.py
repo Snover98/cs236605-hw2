@@ -31,7 +31,6 @@ class MLP(Block):
         """
         blocks = []
 
-        # TODO: Build the MLP architecture as described.
         # ====== YOUR CODE: ======
         if activation == 'relu':
             activation_type = ReLU
@@ -45,7 +44,6 @@ class MLP(Block):
             prev_dim = next_dim
 
         blocks.append(Linear(prev_dim, num_classes))
-
         # ========================
 
         self.sequence = Sequential(*blocks)
