@@ -41,6 +41,8 @@ class MLP(Block):
         for next_dim in list(hidden_features):
             blocks.append(Linear(prev_dim, next_dim))
             blocks.append(activation_type())
+            if dropout > 0:
+                blocks.append(Dropout(dropout))
             prev_dim = next_dim
 
         blocks.append(Linear(prev_dim, num_classes))

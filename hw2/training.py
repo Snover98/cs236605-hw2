@@ -72,7 +72,22 @@ class Trainer(abc.ABC):
             # - Optional: Implement early stopping. This is a very useful and
             #   simple regularization technique that is highly recommended.
             # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            loss, acc = self.train_epoch(dl_train, **kw)
+            train_loss.append(loss)
+            train_acc.append(acc)
+
+            loss, acc = self.test_epoch(dl_test, **kw)
+            test_loss.append(loss)
+            test_acc.append(acc)
+
+            if best_acc is None or acc > best_acc:
+                best_acc = acc
+                if checkpoints is not None:
+                    self.model.save(checkpoints)
+            else:
+                epochs_without_improvement += 1
+                if early_stopping is not None:
+                    break
             # ========================
 
         return FitResult(actual_num_epochs,
@@ -182,13 +197,21 @@ class BlocksTrainer(Trainer):
     def train_batch(self, batch) -> BatchResult:
         X, y = batch
 
-        # TODO: Train the Block model on one batch of data.
-        # - Forward pass
-        # - Backward pass
-        # - Optimize params
-        # - Calculate number of correct predictions
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        self.optimizer.zero_grad()
+
+        # Forward pass
+        y_hat = self.model.forward(X)
+        loss = self.loss_fn(y_hat, y)
+
+        # Backward pass
+        self.model.backward(self.loss_fn.backward())
+
+        # Optimize params
+        self.optimizer.step()
+
+        # Calculate number of correct predictions
+        num_correct = (y_hat.argmax(dim=1) == y).sum().item()
         # ========================
 
         return BatchResult(loss, num_correct)
@@ -196,11 +219,13 @@ class BlocksTrainer(Trainer):
     def test_batch(self, batch) -> BatchResult:
         X, y = batch
 
-        # TODO: Evaluate the Block model on one batch of data.
-        # - Forward pass
-        # - Calculate number of correct predictions
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        # Forward pass
+        y_hat = self.model.forward(X)
+        loss = self.loss_fn(y_hat, y)
+
+        # Calculate number of correct predictions
+        num_correct = (y_hat.argmax(dim=1) == y).sum().item()
         # ========================
 
         return BatchResult(loss, num_correct)
