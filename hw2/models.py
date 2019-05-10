@@ -17,6 +17,7 @@ class MLP(Block):
     If dropout is used, a dropout layer is added after every activation
     function.
     """
+
     def __init__(self, in_features, num_classes, hidden_features=(),
                  activation='relu', dropout=0, **kw):
         super().__init__()
@@ -73,6 +74,7 @@ class ConvClassifier(nn.Module):
     The architecture is:
     [(Conv -> ReLU)*P -> MaxPool]*(N/P) -> (Linear -> ReLU)*M -> Linear
     """
+
     def __init__(self, in_size, out_classes, filters, pool_every, hidden_dims):
         """
         :param in_size: Size of input images, e.g. (C,H,W).
@@ -102,7 +104,19 @@ class ConvClassifier(nn.Module):
         # Use only dimension-preserving 3x3 convolutions. Apply 2x2 Max
         # Pooling to reduce dimensions.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+
+        prev_channels = in_channels
+        h, w = in_h, in_w
+        for idx, num_channels in enumerate(self.filters, 1):
+            layers.append(nn.Conv2d(prev_channels, num_channels, 3, padding=1))
+            layers.append(nn.ReLU())
+            prev_channels = num_channels
+
+            if idx % self.pool_every == 0:
+                layers.append(nn.MaxPool2d(2))
+                h, w = h // 2, w // 2
+
+        self.features_num = prev_channels * h * w
 
         # ========================
         seq = nn.Sequential(*layers)
@@ -117,7 +131,13 @@ class ConvClassifier(nn.Module):
         # You'll need to calculate the number of features first.
         # The last Linear layer should have an output dimension of out_classes.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        prev_dim = self.features_num
+        for next_dim in list(self.hidden_dims):
+            layers.append(nn.Linear(prev_dim, next_dim))
+            layers.append(nn.ReLU())
+            prev_dim = next_dim
+
+        layers.append(nn.Linear(prev_dim, self.out_classes))
         # ========================
         seq = nn.Sequential(*layers)
         return seq
@@ -127,7 +147,9 @@ class ConvClassifier(nn.Module):
         # Extract features from the input, run the classifier on them and
         # return class scores.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        features = self.feature_extractor(x)
+        print(features.shape)
+        out = self.classifier(features.view(features.shape[0], -1))
         # ========================
         return out
 
@@ -143,4 +165,3 @@ class YourCodeNet(ConvClassifier):
         # ====== YOUR CODE: ======
         raise NotImplementedError()
         # ========================
-
