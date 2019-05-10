@@ -13,7 +13,8 @@ def exp1_1():
     for K in [32, 64]:
         for L in [2, 4, 8, 16]:
             exp_name = f'exp1_1_K{K}_L{L}'
-            run_experiment(run_name=exp_name, filters_per_layer=[K], layers_per_block=L)
+            run_experiment(run_name=exp_name, filters_per_layer=[K], layers_per_block=L, pool_every=2,
+                           hidden_dims=[1024])
 
 
 def exp1_2():
@@ -21,7 +22,8 @@ def exp1_2():
     for L in [2, 4, 8]:
         for K in [32, 64, 128, 258]:
             exp_name = f'exp1_2_L{L}_K{K}'
-            run_experiment(run_name=exp_name, filters_per_layer=[K], layers_per_block=L)
+            run_experiment(run_name=exp_name, filters_per_layer=[K], layers_per_block=L, pool_every=2,
+                           hidden_dims=[1024])
 
 
 def exp1_3():
@@ -29,7 +31,7 @@ def exp1_3():
     K = [64, 128, 256]
     for L in [1, 2, 3, 4]:
         exp_name = f'exp1_3_L{L}_K{K[0]}-{K[1]}-{K[2]}'
-        run_experiment(run_name=exp_name, filters_per_layer=K, layers_per_block=L)
+        run_experiment(run_name=exp_name, filters_per_layer=[K], layers_per_block=L, pool_every=2, hidden_dims=[1024])
 
 
 def exp2():
@@ -37,7 +39,7 @@ def exp2():
     K = [64, 128, 256, 512]
     for L in [1, 2, 3, 4]:
         exp_name = f'exp2_L{L}_K{K[0]}-{K[1]}-{K[2]}'
-        run_experiment(run_name=exp_name, filters_per_layer=K, layers_per_block=L, ycn=True)
+        run_experiment(run_name=exp_name, filters_per_layer=K, layers_per_block=L, ycn=True, hidden_dims=[1024])
 
 
 if __name__ == '__main__':
