@@ -263,7 +263,7 @@ class TorchTrainer(Trainer):
         num_correct = (y_hat.argmax(dim=1) == y).sum().item()
         # ========================
 
-        return BatchResult(loss, num_correct)
+        return BatchResult(loss.item(), num_correct)
 
     def test_batch(self, batch) -> BatchResult:
         X, y = batch
@@ -284,4 +284,4 @@ class TorchTrainer(Trainer):
             num_correct = (y_hat.argmax(dim=1) == y).sum().item()
             # ========================
 
-        return BatchResult(loss, num_correct)
+        return BatchResult(loss.item(), num_correct)
