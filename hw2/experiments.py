@@ -71,7 +71,7 @@ def run_experiment(run_name, out_dir='./results', seed=None,
 
     loss_fn = nn.CrossEntropyLoss()
 
-    optimizer = optim.adam.Adam(model.params, lr=lr, weight_decay=reg)
+    optimizer = optim.Adam(model.params, lr=lr, weight_decay=reg)
 
     trainer = training.TorchTrainer(model, loss_fn, optimizer, device=device)
 
