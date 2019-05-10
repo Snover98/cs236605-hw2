@@ -11,6 +11,9 @@ import torchvision
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 
+from torch import optim
+from torch import nn
+
 from cs236605.train_results import FitResult
 from . import models
 from . import training
@@ -32,7 +35,7 @@ def run_experiment(run_name, out_dir='./results', seed=None,
     :param out_dir: Where to write the output to.
     """
     if not seed:
-        seed = random.randint(0, 2**31)
+        seed = random.randint(0, 2 ** 31)
     torch.manual_seed(seed)
     if not bs_test:
         bs_test = max([bs_train // 4, 1])
@@ -56,7 +59,27 @@ def run_experiment(run_name, out_dir='./results', seed=None,
     #  for you automatically.
     fit_res = None
     # ====== YOUR CODE: ======
-    raise NotImplementedError()
+    x0, _ = ds_train[0]
+    in_size = x0.shape
+    num_classes = 10
+
+    filters = []
+    for f in filters_per_layer:
+        filters += f * layers_per_block
+
+    model = model_cls(in_size, num_classes, filters, pool_every, hidden_dims)
+
+    loss_fn = nn.CrossEntropyLoss()
+
+    optimizer = optim.adam.Adam(model.params, lr=lr, weight_decay=reg)
+
+    trainer = training.TorchTrainer(model, loss_fn, optimizer, device=device)
+
+    dl_train = DataLoader(ds_train, bs_train, shuffle=False, sampler=torch.utils.data.RandomSampler(ds_train))
+    dl_test = DataLoader(ds_train, bs_test, shuffle=False)
+
+    fit_res = trainer.fit(dl_train, dl_test, epochs, early_stopping=early_stopping, checkpoints=checkpoints,
+                          max_batches=batches)
     # ========================
 
     save_experiment(run_name, out_dir, cfg, fit_res)
