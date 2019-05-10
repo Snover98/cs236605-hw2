@@ -32,7 +32,7 @@ def exp1_3():
     K = [64, 128, 256]
     for L in [1, 2, 3, 4]:
         exp_name = f'exp1_3_L{L}_K{K[0]}-{K[1]}-{K[2]}'
-        run_experiment(run_name=exp_name, filters_per_layer=[K], layers_per_block=L, pool_every=L, hidden_dims=[1024])
+        run_experiment(run_name=exp_name, filters_per_layer=K, layers_per_block=L, pool_every=L, hidden_dims=[1024])
 
 
 def exp2():
