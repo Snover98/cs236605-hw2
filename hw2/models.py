@@ -148,7 +148,6 @@ class ConvClassifier(nn.Module):
         # return class scores.
         # ====== YOUR CODE: ======
         features = self.feature_extractor(x)
-        print(features.shape)
         out = self.classifier(features.view(features.shape[0], -1))
         # ========================
         return out
