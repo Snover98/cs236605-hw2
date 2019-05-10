@@ -13,6 +13,7 @@ def exp1_1():
     for K in [32, 64]:
         for L in [2, 4, 8, 16]:
             exp_name = f'exp1_1_K{K}_L{L}'
+            print(f"CURRENT RUN: {exp_name}")
             run_experiment(run_name=exp_name, filters_per_layer=[K], layers_per_block=L, pool_every=2,
                            hidden_dims=[1024])
 
