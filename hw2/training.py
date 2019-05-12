@@ -9,6 +9,13 @@ from typing import Callable, Any
 from cs236605.train_results import BatchResult, EpochResult, FitResult
 
 
+def average(list):
+    total = 0
+    for elm in list:
+        total += elm
+    return total/len(list)
+
+
 class Trainer(abc.ABC):
     """
     A class abstracting the various tasks of training models.
@@ -72,11 +79,13 @@ class Trainer(abc.ABC):
             # - Optional: Implement early stopping. This is a very useful and
             #   simple regularization technique that is highly recommended.
             # ====== YOUR CODE: ======
-            loss, acc = self.train_epoch(dl_train, **kw)
+            losses, acc = self.train_epoch(dl_train, **kw)
+            loss = average(losses)
             train_loss.append(loss)
             train_acc.append(acc)
 
-            loss, acc = self.test_epoch(dl_test, **kw)
+            losses, acc = self.test_epoch(dl_test, **kw)
+            loss = average(losses)
             test_loss.append(loss)
             test_acc.append(acc)
 
