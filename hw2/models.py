@@ -185,7 +185,7 @@ class YourCodeNet(ConvClassifier):
 
             layers.append(conv_type(prev_channels, num_channels, 3, padding=1))
             layers.append(nn.ReLU())
-            prev_channels = num_channels
+            prev_channels = layers[-2].out_channels
 
             if idx % self.pool_every == 0:
                 layers.append(nn.MaxPool2d(2))
@@ -208,12 +208,12 @@ class YourCodeNet(ConvClassifier):
         # ====== YOUR CODE: ======
         prev_dim = self.features_num
         for next_dim in list(self.hidden_dims):
-            layers.append(nn.Dropout(prev_dim))
+            layers.append(nn.Dropout())
             layers.append(nn.Linear(prev_dim, next_dim))
             layers.append(nn.ReLU())
             prev_dim = next_dim
 
-        layers.append(nn.Dropout(prev_dim))
+        layers.append(nn.Dropout())
         layers.append(nn.Linear(prev_dim, self.out_classes))
         # ========================
         seq = nn.Sequential(*layers)
@@ -223,4 +223,4 @@ class YourCodeNet(ConvClassifier):
 class SkipConv2d(nn.Conv2d):
     def forward(self, input):
         out = super().forward(input)
-        return out + input
+        torch.cat((input, out), dim=1)
