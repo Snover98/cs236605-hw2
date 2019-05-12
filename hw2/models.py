@@ -179,7 +179,7 @@ class YourCodeNet(ConvClassifier):
         prev_channels = in_channels
         h, w = in_h, in_w
         for idx, num_channels in enumerate(self.filters, 1):
-            layers.append(nn.BatchNorm2d(num_features=(prev_channels, h, w)))
+            layers.append(nn.BatchNorm2d(num_features=prev_channels))
 
             conv_type = SkipConv2d if idx % self.skip_every == 1 or self.skip_every == 1 else nn.Conv2d
 
