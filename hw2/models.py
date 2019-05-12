@@ -154,13 +154,73 @@ class ConvClassifier(nn.Module):
 
 
 class YourCodeNet(ConvClassifier):
-    def __init__(self, in_size, out_classes, filters, pool_every, hidden_dims):
-        super().__init__(in_size, out_classes, filters, pool_every, hidden_dims)
+    def __init__(self, in_size, out_classes, filters, pool_every, hidden_dims, skip_every=1):
+        # super().__init__(in_size, out_classes, filters, pool_every, hidden_dims)
 
         # TODO: Change whatever you want about the ConvClassifier to try to
         # improve it's results on CIFAR-10.
         # For example, add batchnorm, dropout, skip connections, change conv
         # filter sizes etc.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        self.skip_every = skip_every
+        super().__init__(in_size, out_classes, filters, pool_every, hidden_dims)
         # ========================
+
+    def _make_feature_extractor(self):
+        in_channels, in_h, in_w, = tuple(self.in_size)
+
+        layers = []
+        # TODO: Create the feature extractor part of the model:
+        # [(Conv -> ReLU)*P -> MaxPool]*(N/P)
+        # Use only dimension-preserving 3x3 convolutions. Apply 2x2 Max
+        # Pooling to reduce dimensions.
+        # ====== YOUR CODE: ======
+
+        prev_channels = in_channels
+        h, w = in_h, in_w
+        for idx, num_channels in enumerate(self.filters, 1):
+            layers.append(nn.BatchNorm2d(num_features=(prev_channels, h, w)))
+
+            conv_type = SkipConv2d if idx % self.skip_every == 1 or self.skip_every == 1 else nn.Conv2d
+
+            layers.append(conv_type(prev_channels, num_channels, 3, padding=1))
+            layers.append(nn.ReLU())
+            prev_channels = num_channels
+
+            if idx % self.pool_every == 0:
+                layers.append(nn.MaxPool2d(2))
+                h, w = h // 2, w // 2
+
+        self.features_num = prev_channels * h * w
+
+        # ========================
+        seq = nn.Sequential(*layers)
+        return seq
+
+    def _make_classifier(self):
+        in_channels, in_h, in_w, = tuple(self.in_size)
+
+        layers = []
+        # TODO: Create the classifier part of the model:
+        # (Linear -> ReLU)*M -> Linear
+        # You'll need to calculate the number of features first.
+        # The last Linear layer should have an output dimension of out_classes.
+        # ====== YOUR CODE: ======
+        prev_dim = self.features_num
+        for next_dim in list(self.hidden_dims):
+            layers.append(nn.Dropout(prev_dim))
+            layers.append(nn.Linear(prev_dim, next_dim))
+            layers.append(nn.ReLU())
+            prev_dim = next_dim
+
+        layers.append(nn.Dropout(prev_dim))
+        layers.append(nn.Linear(prev_dim, self.out_classes))
+        # ========================
+        seq = nn.Sequential(*layers)
+        return seq
+
+
+class SkipConv2d(nn.Conv2d):
+    def forward(self, input):
+        out = super().forward(input)
+        return out + input
