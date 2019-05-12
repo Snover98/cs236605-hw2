@@ -7,7 +7,7 @@ def main():
     exp1_1(seed)
     exp1_2(seed)
     exp1_3(seed)
-    # exp2(seed)
+    exp2(seed)
 
 
 def exp1_1(seed):
