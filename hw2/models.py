@@ -181,11 +181,16 @@ class YourCodeNet(ConvClassifier):
         for idx, num_channels in enumerate(self.filters, 1):
             layers.append(nn.BatchNorm2d(num_features=prev_channels))
 
-            conv_type = SkipConv2d if idx % self.skip_every == 1 or self.skip_every == 1 else nn.Conv2d
+            skip_flag = idx % self.skip_every == 1 or self.skip_every == 1
+
+            conv_type = SkipConv2d if skip_flag else nn.Conv2d
 
             layers.append(conv_type(prev_channels, num_channels, 3, padding=1))
             layers.append(nn.ReLU())
-            prev_channels = layers[-2].out_channels
+
+            if not skip_flag:
+                prev_channels = 0
+            prev_channels += layers[-2].out_channels
 
             if idx % self.pool_every == 0:
                 layers.append(nn.MaxPool2d(2))
@@ -222,5 +227,5 @@ class YourCodeNet(ConvClassifier):
 
 class SkipConv2d(nn.Conv2d):
     def forward(self, input):
-        out = super().forward(input)
-        torch.cat((input, out), dim=1)
+        out = super(SkipConv2d, self).forward(input)
+        return torch.cat((input, out), dim=1)
