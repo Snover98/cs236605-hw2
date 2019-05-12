@@ -67,55 +67,52 @@ Given both phenomenons are happening together, on average over the test data, we
 # Part 3 answers
 
 part3_q1 = r"""
-**Your answer:**
-
-
-Write your answer using **markdown** and $\LaTeX$:
-```python
-# A code block
-a = 2
-```
-An equation: $e^{i\pi} -1 = 0$
+1. It seems that more depth tends to produce better results until a certain point,  
+after which more depth tends to make the results significantly worse.  
+A depth of L=4 + Linear_layers=3 = 7 for K=[32] produced the best results,  
+while a depth of L=2 + Linear_layers=3 = 5 for K=[64] produced the best results.  
+This is probably due to each being complex enough to learn the problem,  
+but not so complex that it suffers from overfitting vanishing gradients.  
+2. For L=16 the network was not trainable, as we can see it produced no improvement from the start and stopped due to early stopping.  
+This is probably due to vanishing gradients, as with a network that is too long the gradients tend to get smaller as  
+they get deeper into the start, due to the multiplicative nature of the chain rule.  
+Possible solutions for this problem are the use of skip connections (such as those used in residual networks i.e ResNet)  
+and batch normalization.
 
 """
 
 part3_q2 = r"""
-**Your answer:**
-
-
-Write your answer using **markdown** and $\LaTeX$:
-```python
-# A code block
-a = 2
-```
-An equation: $e^{i\pi} -1 = 0$
+It seems that like more depth, more filters tend to produce better results until a certain point,  
+with K = [258] and L=4 doing the best, probably due to providing enough parameters without overfitting.  
+This makes sense, as using too many parameters means that we are using a model too complex for our problem.  
+With too much depth we can see that the same problem of vanishing gradients we observed previously happens with K=[128],  
+and in general moving from L=4 to L=8 saw significantly worse results, probably due to this problem and overfitting.  
+We can see that adding more filters tends to produce better results than more depth,  
+which, as we saw in part 1.1, only works up to a certain point and to lower precision.  
+Although not enough depth and too many features can cause problems, as we see in L=2 and K=[258]
 
 """
 
 part3_q3 = r"""
-**Your answer:**
-
-
-Write your answer using **markdown** and $\LaTeX$:
-```python
-# A code block
-a = 2
-```
-An equation: $e^{i\pi} -1 = 0$
+We see in the results for these experiments that the best results were produced with L=2,  
+probably due to the fact that K=[64, 128, 256] provided us enough parameters for the learning process,  
+and any more depth probably resulted in more overfitting and vanishing gradients, as is evidenced by the early stopping  
+for L=3 and L=4. 
 
 """
 
 
 part3_q4 = r"""
-**Your answer:**
-
-
-Write your answer using **markdown** and $\LaTeX$:
-```python
-# A code block
-a = 2
-```
-An equation: $e^{i\pi} -1 = 0$
+1. In order to combat the problem of vanishing gradients, we added skip connection and batch normalization to the feature extractor,  
+and dropout to the classifer.  
+This was done to provide more regularization and to make sure the gradients don't vanish.  
+We decided to make every convolution layer a skip connection and use batch normalization before each one.  
+We also used dropout before every Linear layer.  
+  
+2. we can see that our network produced significantly better results than those in experiment 1.3  
+(which is the best point of comparison due to having similar parameters) and that we did not suffer from vanishing gradients.  
+We still suffered from overfitting (especially with more depth) but in general the results we produced were better than  
+those comparable to the experiment in the other tests.
 
 """
 # ==============
