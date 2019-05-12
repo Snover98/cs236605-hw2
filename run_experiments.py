@@ -3,7 +3,8 @@ import random
 
 
 def main():
-    seed = random.randint(0, 2 ** 31)
+    # seed = random.randint(0, 2 ** 31)
+    seed = 1360664947
     exp1_1(seed)
     exp1_2(seed)
     exp1_3(seed)
@@ -44,7 +45,7 @@ def exp2(seed):
     for L in [1, 2, 3, 4]:
         exp_name = f'exp2_L{L}_K{K[0]}-{K[1]}-{K[2]}'
         run_experiment(run_name=exp_name, filters_per_layer=K, layers_per_block=L, ycn=True, hidden_dims=[1024],
-                       pool_every=L, seed=seed)
+                       pool_every=L, seed=seed, skip_every=L)
 
 
 if __name__ == '__main__':
