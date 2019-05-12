@@ -67,7 +67,7 @@ def run_experiment(run_name, out_dir='./results', seed=None,
     for f in filters_per_layer:
         filters += [f] * layers_per_block
 
-    model = model_cls(in_size, num_classes, filters, pool_every, hidden_dims)
+    model = model_cls(in_size, num_classes, filters, pool_every, hidden_dims, **kw)
 
     loss_fn = nn.CrossEntropyLoss()
 
